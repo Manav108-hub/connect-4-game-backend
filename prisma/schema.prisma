@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  wins      Int      @default(0)
+  losses    Int      @default(0)
+  draws     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  games     Game[]
+}
+
+model Game {
+  id          String   @id @default(uuid())
+  player1Id   String
+  player2Id   String
+  winnerId    String?
+  status      String   // active, completed, forfeited
+  board       String   // JSON stringified board state
+  duration    Int?     // in seconds
+  isVsBot     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+  
+  player1     Player   @relation(fields: [player1Id], references: [id])
+  
+  @@index([player1Id])
+  @@index([status])
+  @@index([createdAt])
+}
